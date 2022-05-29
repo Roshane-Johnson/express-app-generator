@@ -4,7 +4,7 @@ import shutil
 
 
 def clean_up():
-    project_files: list[str] = ['.idea', 'main.py', os.path.basename(__file__), 'expressgen.bat', 'venv']
+    project_files: list[str] = ['.idea', 'main.py', os.path.basename(__file__), 'expressgen.bat', "README.md", ".git", 'venv']
     files: list[str] = os.listdir(os.getcwd())
     dir_deleted = 0
     files_deleted = 0
