@@ -253,6 +253,7 @@ def main():
                     '		<title>Express App - <%= page_title %></title>\n'
                     '	</head>\n'
                     '	<body>\n'
+                    '		<%- include("../partials/navbar.ejs") %>\n'
                     '		<%- body %>\n'
                     '	</body>\n'
                     '</html>\n')
