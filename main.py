@@ -13,7 +13,7 @@ def main():
     folders: list[str] = ["views", 'views/layouts', "views/partials", "public", "public/assets", "public/assets/images",
                           "public/assets/js", "public/assets/css", "routes", "lib"]
     files: list[str] = ["app.js", ".env", ".gitignore", "tailwind.config.js", "package.json", "views/index.ejs",
-                        "views/layouts/layout.ejs", "views/partials/imports.ejs", "public/assets/css/_style.css",
+                        "views/layouts/layout.ejs", "views/partials/imports.ejs", "views/partials/navbar.ejs", "public/assets/css/_style.css",
                         "routes/index.js", "lib/db.js", "lib/helpers.js"]
     os.mkdir(project_dir)
 
@@ -236,7 +236,9 @@ def main():
             continue
         if file == "views/index.ejs":
             f = open(os.path.join(project_dir, file), "x")
-            f.write("<h1>Express App Works</h1>")
+            f.write('<div class="h-screen grid place-items-center">\n'
+                    '	<h1 class="">Express App Works</h1>\n'
+                    '</div>\n')
             f.close()
             continue
         if file == "views/layouts/layout.ejs":
@@ -258,9 +260,22 @@ def main():
             continue
         if file == "views/partials/imports.ejs":
             f = open(os.path.join(project_dir, file), "x")
-            f.write('<script src="https://cdn.tailwindcss.com"></script>\n'
-                    '<script defer src="/assets/js/main.js"></script>\n'
+            f.write('<script defer src="/assets/js/main.js"></script>\n'
                     '<link rel="stylesheet" href="/assets/css/style.css" />\n')
+            f.close()
+            continue
+        if file == "views/partials/navbar.ejs":
+            f = open(os.path.join(project_dir, file), 'x')
+            f.write('<nav class="fixed top-0 w-full">\n'
+                    '	<div class="w-10/12 mx-auto py-5 grid grid-cols-2">\n'
+                    '		<a href="/">Express Application</a>\n'
+                    '		<ul class="flex justify-end">\n'
+                    '			<li><a href="/">Home</a></li>\n'
+                    '			<li><a href="/test1">Test 1</a></li>\n'
+                    '			<li><a href="/test2">Test 2</a></li>\n'
+                    '		</ul>\n'
+                    '	</div>\n'
+                    '</nav>\n')
             f.close()
             continue
         if file == "lib/db.js":
@@ -313,7 +328,14 @@ def main():
             f = open(os.path.join(project_dir, file), "x")
             f.write('@tailwind base;\n'
                     '@tailwind components;\n'
-                    '@tailwind utilities;\n')
+                    '@tailwind utilities;\n'
+                    '\n'
+                    'nav ul li {\n'
+                    '	--nav-padding: 10px;\n'
+                    '	display: flex;\n'
+                    '	padding-left: var(--nav-padding);\n'
+                    '	padding-right: var(--nav-padding);\n'
+                    '}\n')
             f.close()
             continue
         if file == "public/assets/js/main.js":
