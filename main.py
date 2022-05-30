@@ -5,6 +5,9 @@ from tkinter import filedialog
 
 # Main function
 def main():
+    app_name = "Express App Generator (Custom)"
+    app_version = "v1.1"
+
     input_dir = input("What's the name of your project? ")
     input("Where should this project be stored? [Hit enter to select location]")
     tkinter.Tk().withdraw()
@@ -30,8 +33,8 @@ def main():
                     'APP_PORT=8080\n'
                     'APP_SESSION_SECRET=expressapp2022\n'
                     '\n'
-                    'DB_HOST=\n'
-                    'DB_USER=\n'
+                    'DB_HOST=localhost\n'
+                    'DB_USER=root\n'
                     'DB_PASS=\n'
                     'DB_NAME=')
             f.close()
@@ -226,6 +229,7 @@ def main():
             f = open(os.path.join(project_dir, file), "x")
             f.write('const express = require(\'express\')\n'
                     'const router = express.Router()\n'
+                    'const DB = require(\'../lib/db\')\n'
                     '\n'
                     'router.get(\'/\', (req, res) => {\n'
                     '	res.render(\'index\', { page_title: \'Home\' })\n'
@@ -341,6 +345,7 @@ def main():
             continue
         if file == "public/assets/js/main.js":
             f = open(os.path.join(project_dir, file), "x")
+            f.write(f'console.info(\'{app_name} {app_version}\')\n')
             f.close()
             continue
 
