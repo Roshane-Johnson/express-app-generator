@@ -1,22 +1,28 @@
 import os
+import subprocess
 import tkinter
+from datetime import date
 from tkinter import filedialog
 
 
 # Main function
 def main():
-    app_name = "Express App Generator (Custom)"
-    app_version = "v1.1"
+    app_name = "Express App Generator (Custom) - Roshane-Johnson"
+    app_version = "v1.3"
 
     input_dir = input("What's the name of your project? ")
-    input("Where should this project be stored? [Hit enter to select location]")
+    input("[!] Where should this project be stored? [Hit enter to select location]")
+    print("[!] Hint: ALT + TAB")
+    print(
+        "[!] This feature is buggy, look for the select folder dialog among your open windows and choose a directory.")
     tkinter.Tk().withdraw()
     gen_directory = filedialog.askdirectory()
     project_dir: str = os.path.join(gen_directory, input_dir)
     folders: list[str] = ["views", 'views/layouts', "views/partials", "public", "public/assets", "public/assets/images",
                           "public/assets/js", "public/assets/css", "routes", "lib"]
     files: list[str] = ["app.js", ".env", ".gitignore", "tailwind.config.js", "package.json", "views/index.ejs",
-                        "views/layouts/layout.ejs", "views/partials/imports.ejs", "views/partials/navbar.ejs", "public/assets/css/_style.css",
+                        "views/layouts/layout.ejs", "views/partials/imports.ejs", "views/partials/navbar.ejs",
+                        "public/assets/css/_style.css", "public/assets/js/main.js",
                         "routes/index.js", "lib/db.js", "lib/helpers.js"]
     os.mkdir(project_dir)
 
@@ -29,9 +35,9 @@ def main():
     for file in files:
         if file == ".env":
             f = open(os.path.join(project_dir, file), "x")
-            f.write('APP_NAME=ExpressApp\n'
-                    'APP_PORT=8080\n'
-                    'APP_SESSION_SECRET=expressapp2022\n'
+            f.write('NAME=ExpressApp\n'
+                    'PORT=8080\n'
+                    f'SESSION_SECRET=express_app{date.today().year}\n'
                     '\n'
                     'DB_HOST=localhost\n'
                     'DB_USER=root\n'
@@ -155,7 +161,9 @@ def main():
                     '	"description": "Just another express application.",\n'
                     '	"main": "app.js",\n'
                     '	"scripts": {\n'
-                    '		"start": "concurrently \\"nodemon app.js\\" \\"npx tailwindcss -i ./public/assets/css/_style.css -o ./public/assets/css/style.css --watch\\""\n'
+                    '		"start": "node app.js",\n'
+                    '		"build": "npx tailwindcss -i ./public/assets/css/_style.css -o ./public/assets/css/style.css --watch",\n'
+                    '		"devStart": "concurrently \\"nodemon app.js\\" \\"npx tailwindcss -i ./public/assets/css/_style.css -o ./public/assets/css/style.css --watch\\""\n'
                     '	},\n'
                     '	"keywords": [],\n'
                     '	"author": "Roshane-Johnson",\n'
@@ -173,9 +181,15 @@ def main():
                     '		"mysql": "^2.18.1"\n'
                     '	},\n'
                     '	"devDependencies": {\n'
+                    '		"@tailwindcss/forms": "^0.5.2",\n'
+                    '		"@tailwindcss/typography": "^0.5.2",\n'
                     '		"concurrently": "^7.2.1",\n'
                     '		"nodemon": "^2.0.16",\n'
                     '		"tailwindcss": "^3.0.24"\n'
+                    '	},\n'
+                    '	"engines": {\n'
+                    '		"node": "^16.13.2",\n'
+                    '		"npm": "^8.5.0"\n'
                     '	}\n'
                     '}\n')
             f.close()
@@ -191,8 +205,8 @@ def main():
                     'const flash = require(\'express-flash\')\n'
                     'const app = express()\n'
                     '\n'
-                    'const PORT = process.env.APP_PORT || 8080\n'
-                    'const APP_NAME = process.env.APP_NAME || \'Express App\'\n'
+                    'const PORT = process.env.PORT || 8080\n'
+                    'const APP_NAME = process.env.NAME || \'Express App\'\n'
                     '\n'
                     '// Express configs\n'
                     'app.set(\'view engine\', \'ejs\')\n'
@@ -207,7 +221,7 @@ def main():
                     'app.use(flash())\n'
                     'app.use(\n'
                     '	session({\n'
-                    '		secret: process.env.APP_SESSION_SECRET || \'secret8080\',\n'
+                    '		secret: process.env.SESSION_SECRET || \'secret8080\',\n'
                     '		resave: false,\n'
                     '		saveUninitialized: false,\n'
                     '		cookie: {\n'
@@ -220,8 +234,8 @@ def main():
                     'app.use(\'/\', require(\'./routes/index\'))\n'
                     '\n'
                     '// Start express app\n'
-                    'app.listen(PORT, () => {\n'
-                    '	console.log(`${APP_NAME} listening on http://localhost:${PORT}`)\n'
+                    'const _app = app.listen(PORT, require(\'os\').hostname(), () => {\n'
+                    '	console.log(`\\n\\t${APP_NAME} listening on http://${_app.address().address}:${_app.address().port}\\n`)\n'
                     '})\n')
             f.close()
             continue
@@ -229,10 +243,9 @@ def main():
             f = open(os.path.join(project_dir, file), "x")
             f.write('const express = require(\'express\')\n'
                     'const router = express.Router()\n'
-                    'const DB = require(\'../lib/db\')\n'
                     '\n'
                     'router.get(\'/\', (req, res) => {\n'
-                    '	res.render(\'index\', { page_title: \'Home\' })\n'
+                    '	res.render(\'index\', { title: \'Home\' })\n'
                     '})\n'
                     '\n'
                     'module.exports = router\n')
@@ -241,7 +254,7 @@ def main():
         if file == "views/index.ejs":
             f = open(os.path.join(project_dir, file), "x")
             f.write('<div class="h-screen grid place-items-center">\n'
-                    '	<h1 class="">Express App Works</h1>\n'
+                    '	<h1>Express App Works</h1>\n'
                     '</div>\n')
             f.close()
             continue
@@ -254,7 +267,7 @@ def main():
                     '		<meta http-equiv="X-UA-Compatible" content="IE=edge" />\n'
                     '		<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n'
                     '		<%- include("../partials/imports.ejs") %>\n'
-                    '		<title>Express App - <%= page_title %></title>\n'
+                    '		<title>Express App - <%= title %></title>\n'
                     '	</head>\n'
                     '	<body>\n'
                     '		<%- include("../partials/navbar.ejs") %>\n'
@@ -273,11 +286,11 @@ def main():
             f = open(os.path.join(project_dir, file), 'x')
             f.write('<nav class="fixed top-0 w-full">\n'
                     '	<div class="w-10/12 mx-auto py-5 grid grid-cols-2">\n'
-                    '		<a href="/">Express Application</a>\n'
+                    '		<a href="/">ExpressApp</a>\n'
                     '		<ul class="flex justify-end">\n'
                     '			<li><a href="/">Home</a></li>\n'
-                    '			<li><a href="/test1">Test 1</a></li>\n'
-                    '			<li><a href="/test2">Test 2</a></li>\n'
+                    '			<li><a href="/test1">Test1</a></li>\n'
+                    '			<li><a href="/test2">Test2</a></li>\n'
                     '		</ul>\n'
                     '	</div>\n'
                     '</nav>\n')
@@ -290,16 +303,19 @@ def main():
                     '\n'
                     'const DB = mysql.createConnection({\n'
                     '	host: process.env.DB_HOST || \'localhost\',\n'
+                    '	port: process.env.DB_PORT || 3306,\n'
                     '	user: process.env.DB_USER || \'root\',\n'
                     '	password: process.env.DB_PASS || \'\',\n'
-                    '	database: process.env.DB_NAME || process.env.APP_NAME.toLowerCase() || \'\',\n'
+                    '	database: process.env.DB_NAME || \'\',\n'
                     '	dateStrings: true,\n'
+                    '	multipleStatements: true,\n'
                     '})\n'
                     '\n'
+                    'console.log(\'Waiting for database connection...\')\n'
                     'DB.connect((err) => {\n'
                     '	if (err) throw err\n'
                     '\n'
-                    '	console.log(\'Database Connected\')\n'
+                    '	console.log(\'Database Connected!\')\n'
                     '})\n'
                     '\n'
                     'module.exports = DB\n')
@@ -307,12 +323,28 @@ def main():
             continue
         if file == "lib/helpers.js":
             f = open(os.path.join(project_dir, file), "x")
-            f.write('function SuccessResponse(res, data, message = \'success\', status = 200) {\n'
-                    '	return res.json({ message: message, status: status, data: data })\n'
+            f.write('/**\n'
+                    ' *\n'
+                    ' * @param {Response} res Express app response parameter\n'
+                    ' * @param {Array} data Data to return as json to the endpoint\n'
+                    ' * @param {string} message Message to return as json to the endpoint. Default: "success"\n'
+                    ' * @param {number} status HTTP Status Code to return to endpoint. Default: 200\n'
+                    ' * @returns\n'
+                    ' */\n'
+                    'function SuccessResponse(res, data = [], message = \'success\', status = 200) {\n'
+                    '	return res.json({ message, status, data })\n'
                     '}\n'
                     '\n'
+                    '/**\n'
+                    ' *\n'
+                    ' * @param {Response} res Express app response parameter\n'
+                    ' * @param {Array} data Data to return as json to the endpoint\n'
+                    ' * @param {string} message Message to return as json to the endpoint. Default: "error"\n'
+                    ' * @param {number} status HTTP Status Code to return to endpoint. Default: 500\n'
+                    ' * @returns\n'
+                    ' */\n'
                     'function ErrorResponse(res, data = [], message = \'error\', status = 500) {\n'
-                    '	return res.json({ message: message, status: status, data: data })\n'
+                    '	return res.json({ message, status, data })\n'
                     '}\n'
                     '\n'
                     'module.exports = { SuccessResponse, ErrorResponse }\n')
@@ -325,7 +357,7 @@ def main():
                     '	theme: {\n'
                     '		extend: {},\n'
                     '	},\n'
-                    '	plugins: [],\n'
+                    '	plugins: [require(\'@tailwindcss/forms\'), require(\'@tailwindcss/typography\')],\n'
                     '}\n')
             f.close()
             continue
@@ -348,6 +380,8 @@ def main():
             f.write(f'console.info(\'{app_name} {app_version}\')\n')
             f.close()
             continue
+    # Generation completed
+    completed(project_dir)
 
 
 def banner():
@@ -358,6 +392,16 @@ def banner():
           '██       ██ ██  ██      ██   ██ ██           ██      ██     ██    ██ ██      ██  ██ ██ \n'
           '███████ ██   ██ ██      ██   ██ ███████ ███████ ███████      ██████  ███████ ██   ████ \n'
           '\n')
+
+
+def completed(generated_app_dir: str):
+    print("***********************************")
+    print("[!] Express App Generated")
+    print("***********************************")
+
+    # Open project directory after app is generated
+    file_browser_path = os.path.join(os.getenv('WINDIR'), 'explorer.exe')
+    subprocess.run([file_browser_path, generated_app_dir])
 
 
 # Script entry point
