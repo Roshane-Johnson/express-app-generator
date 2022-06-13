@@ -7,17 +7,16 @@ from tkinter import filedialog
 
 # Main function
 def main():
-    app_name = "Express App Generator (Custom) - Roshane-Johnson"
-    app_version = "v1.3"
+    app_name = "Express App Generator (EXAG) - Roshane-Johnson"
+    app_version = "v1.4"
 
     input_dir = input("What's the name of your project? ")
-    input("[!] Where should this project be stored? [Hit enter to select location]")
-    print("[!] Hint: ALT + TAB")
+    print("[!] Where should this project be stored? [Hit enter to select location]")
     print(
         "[!] This feature is buggy, look for the select folder dialog among your open windows and choose a directory.")
     tkinter.Tk().withdraw()
     gen_directory = filedialog.askdirectory()
-    project_dir: str = os.path.join(gen_directory, input_dir)
+    project_dir: str = os.path.normpath(os.path.join(gen_directory, input_dir))
     folders: list[str] = ["views", 'views/layouts', "views/partials", "public", "public/assets", "public/assets/images",
                           "public/assets/js", "public/assets/css", "routes", "lib"]
     files: list[str] = ["app.js", ".env", ".gitignore", "tailwind.config.js", "package.json", "views/index.ejs",
@@ -28,16 +27,16 @@ def main():
 
     # Create folders
     for folder in folders:
-        depth_1_folder: str = os.path.join(project_dir, folder)
+        depth_1_folder: str = os.path.normpath(os.path.join(project_dir, folder))
         os.mkdir(depth_1_folder)
 
     # Create files
     for file in files:
         if file == ".env":
-            f = open(os.path.join(project_dir, file), "x")
+            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
             f.write('NAME=ExpressApp\n'
                     'PORT=8080\n'
-                    f'SESSION_SECRET=express_app{date.today().year}\n'
+                    f'SESSION_SECRET=exag_{date.today().year}\n'
                     '\n'
                     'DB_HOST=localhost\n'
                     'DB_USER=root\n'
@@ -46,7 +45,7 @@ def main():
             f.close()
             continue
         if file == ".gitignore":
-            f = open(os.path.join(project_dir, file), "x")
+            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
             f.write('# Logs\n'
                     'logs\n'
                     '*.log\n'
@@ -154,7 +153,7 @@ def main():
             f.close()
             continue
         if file == "package.json":
-            f = open(os.path.join(project_dir, file), "x")
+            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
             f.write('{\n'
                     '	"name": "express-app",\n'
                     '	"version": "1.0.0",\n'
@@ -195,7 +194,7 @@ def main():
             f.close()
             continue
         if file == "app.js":
-            f = open(os.path.join(project_dir, file), "x")
+            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
             f.write('require(\'dotenv\').config()\n'
                     'const express = require(\'express\')\n'
                     'const session = require(\'express-session\')\n'
@@ -240,7 +239,7 @@ def main():
             f.close()
             continue
         if file == "routes/index.js":
-            f = open(os.path.join(project_dir, file), "x")
+            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
             f.write('const express = require(\'express\')\n'
                     'const router = express.Router()\n'
                     '\n'
@@ -252,14 +251,14 @@ def main():
             f.close()
             continue
         if file == "views/index.ejs":
-            f = open(os.path.join(project_dir, file), "x")
+            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
             f.write('<div class="h-screen grid place-items-center">\n'
                     '	<h1>Express App Works</h1>\n'
                     '</div>\n')
             f.close()
             continue
         if file == "views/layouts/layout.ejs":
-            f = open(os.path.join(project_dir, file), "x")
+            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
             f.write('<!DOCTYPE html>\n'
                     '<html lang="en">\n'
                     '	<head>\n'
@@ -267,23 +266,24 @@ def main():
                     '		<meta http-equiv="X-UA-Compatible" content="IE=edge" />\n'
                     '		<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n'
                     '		<%- include("../partials/imports.ejs") %>\n'
-                    '		<title>Express App - <%= title %></title>\n'
+                    '		<title><%= title %> - Express App</title>\n'
                     '	</head>\n'
                     '	<body>\n'
-                    '		<%- include("../partials/navbar.ejs") %>\n'
-                    '		<%- body %>\n'
+                    '		<%- include("../partials/navbar.ejs") %> <%- body %>\n'
                     '	</body>\n'
                     '</html>\n')
             f.close()
             continue
         if file == "views/partials/imports.ejs":
-            f = open(os.path.join(project_dir, file), "x")
-            f.write('<script defer src="/assets/js/main.js"></script>\n'
+            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
+            f.write('<!-- JS -->\n'
+                    '<script defer src="/assets/js/main.js"></script>\n'
+                    '<!-- CSS -->\n'
                     '<link rel="stylesheet" href="/assets/css/style.css" />\n')
             f.close()
             continue
         if file == "views/partials/navbar.ejs":
-            f = open(os.path.join(project_dir, file), 'x')
+            f = open(os.path.normpath(os.path.join(project_dir, file)), 'x')
             f.write('<nav class="fixed top-0 w-full">\n'
                     '	<div class="w-10/12 mx-auto py-5 grid grid-cols-2">\n'
                     '		<a href="/">ExpressApp</a>\n'
@@ -297,7 +297,7 @@ def main():
             f.close()
             continue
         if file == "lib/db.js":
-            f = open(os.path.join(project_dir, file), "x")
+            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
             f.write('const mysql = require(\'mysql\')\n'
                     'require(\'dotenv\').config()\n'
                     '\n'
@@ -322,7 +322,7 @@ def main():
             f.close()
             continue
         if file == "lib/helpers.js":
-            f = open(os.path.join(project_dir, file), "x")
+            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
             f.write('/**\n'
                     ' *\n'
                     ' * @param {Response} res Express app response parameter\n'
@@ -351,7 +351,7 @@ def main():
             f.close()
             continue
         if file == "tailwind.config.js":
-            f = open(os.path.join(project_dir, file), "x")
+            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
             f.write('module.exports = {\n'
                     '	content: [\'./views/**/*.ejs\'],\n'
                     '	theme: {\n'
@@ -362,7 +362,7 @@ def main():
             f.close()
             continue
         if file == "public/assets/css/_style.css":
-            f = open(os.path.join(project_dir, file), "x")
+            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
             f.write('@tailwind base;\n'
                     '@tailwind components;\n'
                     '@tailwind utilities;\n'
@@ -376,12 +376,13 @@ def main():
             f.close()
             continue
         if file == "public/assets/js/main.js":
-            f = open(os.path.join(project_dir, file), "x")
+            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
             f.write(f'console.info(\'{app_name} {app_version}\')\n')
             f.close()
             continue
+
     # Generation completed
-    completed(project_dir)
+    completed(os.path.normpath(project_dir))
 
 
 def banner():
@@ -395,11 +396,18 @@ def banner():
 
 
 def completed(generated_app_dir: str):
-    print("***********************************")
-    print("[!] Express App Generated")
-    print("***********************************")
+    # Change generated directory to absolute path if it is in the script's directory
+    if "\\" not in generated_app_dir:
+        generated_app_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), generated_app_dir))
 
-    # Open project directory after app is generated
+    print()
+    print("*******************************************")
+    print("[!] Express App Generated")
+    print(f"[!] Directory - {generated_app_dir}")
+    print("*******************************************")
+    print()
+
+    # Open project directory after app is generated. Windows Only
     file_browser_path = os.path.join(os.getenv('WINDIR'), 'explorer.exe')
     subprocess.run([file_browser_path, generated_app_dir])
 
