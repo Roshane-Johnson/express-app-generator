@@ -175,6 +175,7 @@ def main():
                     '		"ejs": "^3.1.7",\n'
                     '		"express": "^4.18.1",\n'
                     '		"express-ejs-layouts": "^2.5.1",\n'
+                    '       "express-fileupload": "^1.4.0",\n'
                     '		"express-flash": "^0.0.2",\n'
                     '		"express-session": "^1.17.3",\n'
                     '		"mysql": "^2.18.1"\n'
@@ -198,6 +199,7 @@ def main():
             f.write('require(\'dotenv\').config()\n'
                     'const express = require(\'express\')\n'
                     'const session = require(\'express-session\')\n'
+                    'const fileUpload = require(\'express-fileupload\')\n'
                     'const expressLayouts = require(\'express-ejs-layouts\')\n'
                     'const cors = require(\'cors\')\n'
                     'const path = require(\'path\')\n'
@@ -218,6 +220,7 @@ def main():
                     'app.use(express.static(path.join(__dirname, \'public\')))\n'
                     'app.use(cors([\'*\']))\n'
                     'app.use(flash())\n'
+                    'app.use(fileUpload({ createParentPath: true }))\n'
                     'app.use(\n'
                     '	session({\n'
                     '		secret: process.env.SESSION_SECRET || \'secret8080\',\n'
@@ -408,12 +411,18 @@ def completed(generated_app_dir: str):
     print()
 
     # Open project directory after app is generated. Windows Only
-    file_browser_path = os.path.join(os.getenv('WINDIR'), 'explorer.exe')
-    subprocess.run([file_browser_path, generated_app_dir])
+    # explorer_path = os.path.join(os.getenv('WINDIR'), 'explorer.exe')
+    # subprocess.run([explorer_path, generated_app_dir])
+
+    # Open project directory in VSCode if installed
+    cmd_path = os.path.join(os.getenv("WINDIR"), os.path.normpath("/Windows/System32"), "cmd.exe")
+    subprocess.run([cmd_path, f"cmd.exe /C cd {generated_app_dir} && code ."])
 
 
 # Script entry point
 if __name__ == "__main__":
+
+    # print(cmd_path)
     try:
         banner()
         main()
