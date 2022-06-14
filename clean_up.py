@@ -1,10 +1,11 @@
-from datetime import datetime
 import os
 import shutil
+from datetime import datetime
 
 
 def clean_up():
-    project_files: list[str] = ['.idea', 'main.py', os.path.basename(__file__), 'expressgen.bat', "README.md", ".git", 'venv']
+    project_files: list[str] = [os.path.basename(__file__), '.idea', ".git", 'main.py', 'expressgen.bat', "README.md",
+                                'venv']
     files: list[str] = os.listdir(os.getcwd())
     dir_deleted = 0
     files_deleted = 0
@@ -28,7 +29,8 @@ def clean_up():
     if dir_deleted <= 0 and files_deleted <= 0:
         print(f"{style} No files or directories were deleted")
     else:
-        print(f"{style} {dir_deleted} {'directories' if dir_deleted > 1 else 'directory'} and {files_deleted} {'files' if files_deleted > 1 else 'file'} were deleted")
+        print(
+            f"{style} {dir_deleted} {'directories' if dir_deleted > 1 else 'directory'} and {files_deleted} {'files' if files_deleted > 1 else 'file'} were deleted")
 
 
 if __name__ == "__main__":
