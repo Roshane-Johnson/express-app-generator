@@ -24,7 +24,7 @@ If you'd like to contribute to this project, simply create a fork and make a pul
 
 ## NPM Commands
 
-- Development command `npm run devStart`
+- Development command `npm run watch`
 - Build command `npm run build`
 - Deploy command `npm run start` or `npm start`
 

@@ -1,30 +1,23 @@
 import os
 import subprocess
 import tkinter
-import re
-from datetime import date
 from tkinter import filedialog
+
 
 # Main function
 def main():
-    app_name = "Express App Generator (EXAG) - Roshane-Johnson"
-    app_version = "v1.4"
+    app_version = "v1.0"
 
     input_dir = input("What's the name of your project? ")
     print("[!] Where should this project be stored? [Hit enter to select location]")
     print(
         "[!] This feature is buggy, look for the select folder dialog among your open windows and choose a directory.")
     tkinter.Tk().withdraw()
-    gen_directory = filedialog.askdirectory()
-    formatted_input_dir = re.sub(" ", "_", input_dir)
+    gen_directory = filedialog.askdirectory(title="Select Directory for Generation", mustexist=True)
     project_dir: str = os.path.normpath(os.path.join(gen_directory, input_dir))
-    folders: list[str] = ["views", 'views/layouts', "views/partials", "public", "public/assets", "public/assets/images",
-                          "public/assets/js", "public/assets/css", "routes", "lib"]
-    files: list[str] = ["app.js", ".env", ".gitignore", "tailwind.config.js", "package.json", ".prettierrc",
-                        "views/index.ejs", "views/error.ejs",
-                        "views/layouts/layout.ejs", "views/partials/imports.ejs", "views/partials/navbar.ejs",
-                        "public/assets/css/_style.css", "public/assets/js/main.js",
-                        "routes/index.js", "lib/db.js", "lib/helpers.js"]
+    folders: list[str] = ["routes", "lib", "controllers", "models", "middlewares"]
+    files: list[str] = ["app.js", ".env", ".env.example", ".gitignore", "package.json", ".prettierrc",
+                        "routes/index.routes.js", "lib/helpers.js", "controllers/index.controller.js"]
     os.mkdir(project_dir)
 
     # Create folders
@@ -36,14 +29,26 @@ def main():
     for file in files:
         if file == ".env":
             f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
-            f.write(f'NAME={input_dir}\n'
+            f.write('# Basic application settings\n'
+                    f'NAME={input_dir}\n'
                     'PORT=8080\n'
-                    f'SESSION_SECRET=exag_{date.today().year}\n'
+                    'FRONTEND_URL=http://localhost:4200\n'
                     '\n'
-                    'DB_HOST=localhost\n'
-                    'DB_USER=root\n'
-                    'DB_PASS=\n'
-                    'DB_NAME=')
+                    '# The production state of the app is used to show errors if the app is not in production mode\n'
+                    '# Database connection\n'
+                    'MONGODB_URI=mongodb://localhost:27017/databaseName')
+            f.close()
+            continue
+        if file == ".env.example":
+            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
+            f.write('# Basic application settings\n'
+                    'NAME=\n'
+                    'PORT=\n'
+                    'FRONTEND_URL=\n'
+                    '\n'
+                    '# The production state of the app is used to show errors if the app is not in production mode\n'
+                    '# Database connection\n'
+                    'MONGODB_URI=')
             f.close()
             continue
         if file == ".gitignore":
@@ -159,12 +164,11 @@ def main():
             f.write('{\n'
                     f'	"name": "{input_dir}",\n'
                     '	"version": "1.0.0",\n'
-                    '	"description": "Just another express application.",\n'
+                    '	"description": "Just another express api.",\n'
                     '	"main": "app.js",\n'
                     '	"scripts": {\n'
                     '		"start": "node app.js",\n'
-                    '		"build": "npx tailwindcss -i ./public/assets/css/_style.css -o ./public/assets/css/style.css --watch",\n'
-                    '		"dev": "concurrently \\"nodemon app.js\\" \\"npx tailwindcss -i ./public/assets/css/_style.css -o ./public/assets/css/style.css --watch\\""\n'
+                    '		"dev": "nodemon app.js"\n'
                     '	},\n'
                     '	"keywords": [],\n'
                     '	"author": "Roshane-Johnson",\n'
@@ -174,20 +178,12 @@ def main():
                     '		"bcrypt": "^5.0.1",\n'
                     '		"cors": "^2.8.5",\n'
                     '		"dotenv": "^16.0.0",\n'
-                    '		"ejs": "^3.1.7",\n'
                     '		"express": "^4.18.1",\n'
-                    '		"express-ejs-layouts": "^2.5.1",\n'
-                    '		"express-fileupload": "^1.4.0",\n'
-                    '		"express-flash": "^0.0.2",\n'
-                    '		"express-session": "^1.17.3",\n'
-                    '		"mysql": "^2.18.1"\n'
+                    '		"ip": "^1.1.8",\n'
+                    '		"mongoose": "^6.5.0"\n'
                     '	},\n'
                     '	"devDependencies": {\n'
-                    '		"@tailwindcss/forms": "^0.5.2",\n'
-                    '		"@tailwindcss/typography": "^0.5.2",\n'
-                    '		"concurrently": "^7.2.1",\n'
-                    '		"nodemon": "^2.0.16",\n'
-                    '		"tailwindcss": "^3.0.24"\n'
+                    '		"nodemon": "^2.0.16"\n'
                     '	},\n'
                     '	"engines": {\n'
                     '		"node": "^16.13.2",\n'
@@ -198,51 +194,45 @@ def main():
             continue
         if file == "app.js":
             f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
-            f.write('require(\'dotenv\').config()\n'
+            f.write('require(\'dotenv/config\')\n'
                     'const express = require(\'express\')\n'
-                    'const session = require(\'express-session\')\n'
-                    'const fileUpload = require(\'express-fileupload\')\n'
-                    'const expressLayouts = require(\'express-ejs-layouts\')\n'
+                    'const mongoose = require(\'mongoose\')\n'
                     'const cors = require(\'cors\')\n'
-                    'const path = require(\'path\')\n'
-                    'const flash = require(\'express-flash\')\n'
                     'const app = express()\n'
+                    'const ip = require(\'ip\')\n'
                     'const PORT = process.env.PORT || 8080\n'
-                    'const APP_NAME = process.env.NAME || \'Express App\'\n'
-                    '\n'
-                    '/* Express Configs */\n'
-                    'app.set(\'view engine\', \'ejs\')\n'
-                    'app.set(\'layout\', \'layouts/layout\')\n'
-                    'app.set(\'views\', path.join(__dirname, \'views\'))\n'
+                    f'const NAME = process.env.NAME || \'{input_dir}\'\n'
                     '\n'
                     '/* Middlewares */\n'
-                    'app.use(expressLayouts)\n'
                     'app.use(express.json())\n'
                     'app.use(express.urlencoded({ extended: true }))\n'
-                    'app.use(express.static(path.join(__dirname, \'public\')))\n'
-                    'app.use(cors([\'*\']))\n'
-                    'app.use(flash())\n'
-                    'app.use(fileUpload({ createParentPath: true }))\n'
-                    'app.use(\n'
-                    '	session({\n'
-                    '		secret: process.env.SESSION_SECRET || \'secret8080\',\n'
-                    '		resave: false,\n'
-                    '		saveUninitialized: false,\n'
-                    '		cookie: {\n'
-                    '			maxAge: 1000 * 60 * 60 * 24, // day in milliseconds\n'
-                    '		},\n'
-                    '	})\n'
-                    ')\n'
+                    'app.use(cors([process.env.FRONTEND_URL, process.env.PRODUCTION ? undefined : \'*\']))\n'
                     '\n'
-                    '/* View Routes */\n'
-                    'app.use(\'/\', require(\'./routes/index\'))\n'
+                    '/* Routers */\n'
+                    'const indexRouter = require(\'./routes/index.routes\')\n'
+                    'const { DevLog } = require(\'./lib/helpers\')\n'
+                    '\n'
+                    'app.use(\'/\', indexRouter)\n'
                     '\n'
                     '/* Start Express App */\n'
-                    'const _app = app.listen(PORT, require(\'os\').hostname(), () => {\n'
-                    '	console.log(\n'
-                    '		`${APP_NAME} listening on http://${_app.address().address}:${_app.address().port}`\n'
-                    '	)\n'
-                    '})\n')
+                    'mongoose\n'
+                    '	.connect(process.env.MONGODB_URI)\n'
+                    '	.then(() => {\n'
+                    '		app.listen(PORT, () => {\n'
+                    '			console.log(\n'
+                    '				`\\r==========================================================\\n\n'
+                    '				\\r\\t[*] Endpoints for \\x1b[34m${NAME}\\x1b[0m are available [*]\\n\n'
+                    '				\\r\\t[*] Local: \\x1b[4m\\x1b[32mhttp://localhost:${PORT}\\x1b[0m\\r\n'
+                    '				\\r\\t[*] Your Network: \\x1b[4m\\x1b[32m${`http://${ip.address()}`}:${PORT}\\x1b[0m\\r\n'
+                    '				\\r\\t[*] MongoDB URI: ${process.env.MONGODB_URI}\\r\n'
+                    '				\\r\\n==========================================================`\n'
+                    '			)\n'
+                    '		})\n'
+                    '	})\n'
+                    '	.catch((err) => {\n'
+                    '		console.log(\'[!] Failed to connect MongoDB\')\n'
+                    '		DevLog(err)\n'
+                    '	})\n')
             f.close()
             continue
         if file == ".prettierrc":
@@ -262,174 +252,81 @@ def main():
                     '}\n')
             f.close()
             continue
-        if file == "routes/index.js":
+        if file == "routes/index.routes.js":
             f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
             f.write('const express = require(\'express\')\n'
                     'const router = express.Router()\n'
+                    'const IndexController = require(\'../controllers/index.controller\')\n'
                     '\n'
-                    'router.get(\'/\', (req, res) => {\n'
-                    '	res.render(\'index\', { title: \'Home\' })\n'
-                    '})\n'
+                    'router.route(\'/\').get(IndexController.welcome).post(IndexController.fun)\n'
                     '\n'
                     'module.exports = router\n')
             f.close()
             continue
-        if file == "views/index.ejs":
-            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
-            f.write('<div class="h-screen grid place-items-center">\n'
-                    '	<h1>Express App Works</h1>\n'
-                    '</div>\n')
-            f.close()
-            continue
-        if file == "views/error.ejs":
-            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
-            f.write('<div class="flex items-center justify-center w-screen h-screen bg-white">\n'
-                    '	<div class="flex flex-col items-center">\n'
-                    '		<h6 class="mb-2 text-2xl font-bold text-center text-gray-800 md:text-3xl">\n'
-                    '			<span class="text-red-500">Oops!</span> <%= error.code %>\n'
-                    '		</h6>\n'
-                    '		<pre class="mb-8 text-gray-500 md:text-lg">\n'
-                    '			<%= JSON.stringify(error, undefined, 2) %>\n'
-                    '		</pre\n'
-                    '		>\n'
-                    '		<button\n'
-                    '			onclick="history.back()"\n'
-                    '			class="px-6 py-2 text-sm font-semibold uppercase text-blue-800 bg-blue-100">\n'
-                    '			Go Back\n'
-                    '		</button>\n'
-                    '	</div>\n'
-                    '</div>\n')
-            f.close()
-        if file == "views/layouts/layout.ejs":
-            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
-            f.write('<!DOCTYPE html>\n'
-                    '<html lang="en">\n'
-                    '	<head>\n'
-                    '		<meta charset="UTF-8" />\n'
-                    '		<meta http-equiv="X-UA-Compatible" content="IE=edge" />\n'
-                    '		<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n'
-                    '		<%- include("../partials/imports.ejs") %>\n'
-                    '		<title><%= title %> - Express App</title>\n'
-                    '	</head>\n'
-                    '	<body>\n'
-                    '		<%- include("../partials/navbar.ejs") %> <%- body %>\n'
-                    '	</body>\n'
-                    '</html>\n')
-            f.close()
-            continue
-        if file == "views/partials/imports.ejs":
-            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
-            f.write('<!-- JS -->\n'
-                    '<script defer src="/assets/js/main.js"></script>\n'
-                    '<!-- CSS -->\n'
-                    '<link rel="stylesheet" href="/assets/css/style.css" />\n')
-            f.close()
-            continue
-        if file == "views/partials/navbar.ejs":
-            f = open(os.path.normpath(os.path.join(project_dir, file)), 'x')
-            f.write('<nav class="mb-10">\n'
-                    '	<div class="w-10/12 mx-auto py-5 grid grid-cols-2">\n'
-                    '		<a href="/">ExpressApp</a>\n'
-                    '		<ul class="flex justify-end">\n'
-                    '			<li><a href="/">Home</a></li>\n'
-                    '			<li><a href="/login">Login</a></li>\n'
-                    '			<li><a href="/test2">Test2</a></li>\n'
-                    '		</ul>\n'
-                    '	</div>\n'
-                    '</nav>\n')
-            f.close()
-            continue
-        if file == "lib/db.js":
-            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
-            f.write('const mysql = require(\'mysql\')\n'
-                    'require(\'dotenv\').config()\n'
-                    '\n'
-                    'const DB = mysql.createConnection({\n'
-                    '	host: process.env.DB_HOST || \'localhost\',\n'
-                    '	port: process.env.DB_PORT || 3306,\n'
-                    '	user: process.env.DB_USER || \'root\',\n'
-                    '	password: process.env.DB_PASS || \'\',\n'
-                    '	database: process.env.DB_NAME || \'\',\n'
-                    '	dateStrings: true,\n'
-                    '	multipleStatements: true,\n'
-                    '})\n'
-                    '\n'
-                    'console.log(\'Waiting for database connection...\')\n'
-                    'DB.connect((err) => {\n'
-                    '	if (err) throw err\n'
-                    '\n'
-                    '	console.log(\'Database Connected!\')\n'
-                    '})\n'
-                    '\n'
-                    'module.exports = DB\n')
-            f.close()
-            continue
         if file == "lib/helpers.js":
             f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
-            f.write('/**\n'
+            f.write('require(\'dotenv/config\')\n'
+                    '\n'
+                    '/**\n'
                     ' *\n'
                     ' * @param {Response} res Express app response parameter\n'
                     ' * @param {Array} data Data to return as json to the endpoint\n'
-                    ' * @param {string} message Message to return as json to the endpoint. Default: "success"\n'
-                    ' * @param {number} status HTTP Status Code to return to endpoint. Default: 200\n'
+                    ' * @param {String} message Message to return as json to the endpoint. Default: "success"\n'
+                    ' * @param {Number} status HTTP Status Code to return to endpoint. Default: 200\n'
                     ' * @returns\n'
                     ' */\n'
                     'function SuccessResponse(res, data = [], message = \'success\', status = 200) {\n'
-                    '	return res.json({ message, status, data })\n'
+                    '	return res.status(status).json({ message, status, data })\n'
                     '}\n'
                     '\n'
                     '/**\n'
                     ' *\n'
                     ' * @param {Response} res Express app response parameter\n'
                     ' * @param {Array} data Data to return as json to the endpoint\n'
-                    ' * @param {string} message Message to return as json to the endpoint. Default: "error"\n'
-                    ' * @param {number} status HTTP Status Code to return to endpoint. Default: 500\n'
+                    ' * @param {String} message Message to return as json to the endpoint. Default: "error"\n'
+                    ' * @param {Number} status HTTP Status Code to return to endpoint. Default: 500\n'
                     ' * @returns\n'
                     ' */\n'
                     'function ErrorResponse(res, data = [], message = \'error\', status = 500) {\n'
-                    '	return res.json({ message, status, data })\n'
+                    '	return res.status(status).json({ message, status, data })\n'
                     '}\n'
                     '\n'
                     '/**\n'
-                    ' *\n'
-                    ' * @param {Response} res Express app response parameter\n'
-                    ' * @param {import("mysql").MysqlError} err Error to be displayed on the express error page\n'
+                    ' * Logs information if the application is in development mode\n'
+                    ' * @param {any} message Information to output\n'
                     ' */\n'
-                    'function RenderError(res, error) {\n'
-                    '	return res.render(\'error\', { error, title: \'Error\' })\n'
+                    'function DevLog(message = \'\') {\n'
+                    '	const isProduction = process.env.PRODUCTION || false\n'
+                    '\n'
+                    '	if (isProduction === false) {\n'
+                    '		console.log(message)\n'
+                    '	}\n'
                     '}\n'
                     '\n'
-                    'module.exports = { SuccessResponse, ErrorResponse, RenderError }\n')
+                    'module.exports = { SuccessResponse, ErrorResponse, DevLog }\n')
             f.close()
             continue
-        if file == "tailwind.config.js":
+        if file == "controllers/index.controller.js":
             f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
-            f.write('module.exports = {\n'
-                    '	content: [\'./views/**/*.ejs\'],\n'
-                    '	theme: {\n'
-                    '		extend: {},\n'
-                    '	},\n'
-                    '	plugins: [require(\'@tailwindcss/forms\'), require(\'@tailwindcss/typography\')],\n'
-                    '}\n')
-            f.close()
-            continue
-        if file == "public/assets/css/_style.css":
-            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
-            f.write('@tailwind base;\n'
-                    '@tailwind components;\n'
-                    '@tailwind utilities;\n'
+            f.write('class IndexController {\n'
+                    '	static welcome = (req, res) => {\n'
+                    '		res.status(200).json({\n'
+                    '			message: \'Hello, World!\',\n'
+                    f'			version: \'{app_version}\',\n'
+                    '			author: \'Roshane-Johnson\',\n'
+                    '		})\n'
+                    '	}\n'
                     '\n'
-                    'nav ul li {\n'
-                    '	--nav-padding: 10px;\n'
-                    '	display: flex;\n'
-                    '	padding-left: var(--nav-padding);\n'
-                    '	padding-right: var(--nav-padding);\n'
-                    '}\n')
-            f.close()
-            continue
-        if file == "public/assets/js/main.js":
-            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
-            f.write(f'console.info(\'{app_name} {app_version}\')\n')
+                    '	static fun = (req, res) => {\n'
+                    '		res.status(419).json({\n'
+                    '			message:\n'
+                    f'				\'You seem to have a lot of free time, would you like to help develop {input_dir}!\',\n'
+                    f'			version: \'{app_version}\',\n'
+                    '		})\n'
+                    '	}\n'
+                    '}\n'
+                    '\n'
+                    'module.exports = IndexController\n')
             f.close()
             continue
 
@@ -454,18 +351,18 @@ def completed(generated_app_dir: str):
 
     print()
     print("*******************************************")
-    print("[!] Express App Generated")
+    print("[!] Express API App Generated")
     print(f"[!] Directory - {generated_app_dir}")
     print("*******************************************")
     print()
 
-    # Open project directory after app is generated. (Windows only)
+    # Open project directory after app is generated. (Windows Only)
     # explorer_path = os.path.join(os.getenv('WINDIR'), 'explorer.exe')
     # subprocess.run([explorer_path, generated_app_dir])
 
-    # Open project directory in VSCode (If installed on Windows only)
+    # Open project directory in VSCode (if installed)
     cmd_path = os.path.join(os.getenv("WINDIR"), os.path.normpath("/Windows/System32"), "cmd.exe")
-    subprocess.run([cmd_path, f"cmd.exe /C cd {generated_app_dir} && code ."])
+    subprocess.run([cmd_path, f"cmd.exe /C code {generated_app_dir}"])
 
 
 # Script entry point

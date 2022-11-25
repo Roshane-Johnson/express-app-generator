@@ -4,3 +4,5 @@ COLOR a
 CLS
 python ./main.py
 COLOR
+PAUSE
+EXIT
