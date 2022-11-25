@@ -1,9 +1,9 @@
 import os
 import subprocess
 import tkinter
+import re
 from datetime import date
 from tkinter import filedialog
-
 
 # Main function
 def main():
@@ -16,10 +16,12 @@ def main():
         "[!] This feature is buggy, look for the select folder dialog among your open windows and choose a directory.")
     tkinter.Tk().withdraw()
     gen_directory = filedialog.askdirectory()
+    formatted_input_dir = re.sub(" ", "_", input_dir)
     project_dir: str = os.path.normpath(os.path.join(gen_directory, input_dir))
     folders: list[str] = ["views", 'views/layouts', "views/partials", "public", "public/assets", "public/assets/images",
                           "public/assets/js", "public/assets/css", "routes", "lib"]
-    files: list[str] = ["app.js", ".env", ".gitignore", "tailwind.config.js", "package.json", "views/index.ejs",
+    files: list[str] = ["app.js", ".env", ".gitignore", "tailwind.config.js", "package.json", ".prettierrc",
+                        "views/index.ejs", "views/error.ejs",
                         "views/layouts/layout.ejs", "views/partials/imports.ejs", "views/partials/navbar.ejs",
                         "public/assets/css/_style.css", "public/assets/js/main.js",
                         "routes/index.js", "lib/db.js", "lib/helpers.js"]
@@ -34,7 +36,7 @@ def main():
     for file in files:
         if file == ".env":
             f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
-            f.write('NAME=ExpressApp\n'
+            f.write(f'NAME={input_dir}\n'
                     'PORT=8080\n'
                     f'SESSION_SECRET=exag_{date.today().year}\n'
                     '\n'
@@ -155,14 +157,14 @@ def main():
         if file == "package.json":
             f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
             f.write('{\n'
-                    '	"name": "express-app",\n'
+                    f'	"name": "{input_dir}",\n'
                     '	"version": "1.0.0",\n'
                     '	"description": "Just another express application.",\n'
                     '	"main": "app.js",\n'
                     '	"scripts": {\n'
                     '		"start": "node app.js",\n'
                     '		"build": "npx tailwindcss -i ./public/assets/css/_style.css -o ./public/assets/css/style.css --watch",\n'
-                    '		"devStart": "concurrently \\"nodemon app.js\\" \\"npx tailwindcss -i ./public/assets/css/_style.css -o ./public/assets/css/style.css --watch\\""\n'
+                    '		"dev": "concurrently \\"nodemon app.js\\" \\"npx tailwindcss -i ./public/assets/css/_style.css -o ./public/assets/css/style.css --watch\\""\n'
                     '	},\n'
                     '	"keywords": [],\n'
                     '	"author": "Roshane-Johnson",\n'
@@ -175,7 +177,7 @@ def main():
                     '		"ejs": "^3.1.7",\n'
                     '		"express": "^4.18.1",\n'
                     '		"express-ejs-layouts": "^2.5.1",\n'
-                    '       "express-fileupload": "^1.4.0",\n'
+                    '		"express-fileupload": "^1.4.0",\n'
                     '		"express-flash": "^0.0.2",\n'
                     '		"express-session": "^1.17.3",\n'
                     '		"mysql": "^2.18.1"\n'
@@ -205,15 +207,15 @@ def main():
                     'const path = require(\'path\')\n'
                     'const flash = require(\'express-flash\')\n'
                     'const app = express()\n'
-                    '\n'
                     'const PORT = process.env.PORT || 8080\n'
                     'const APP_NAME = process.env.NAME || \'Express App\'\n'
                     '\n'
-                    '// Express configs\n'
+                    '/* Express Configs */\n'
                     'app.set(\'view engine\', \'ejs\')\n'
                     'app.set(\'layout\', \'layouts/layout\')\n'
+                    'app.set(\'views\', path.join(__dirname, \'views\'))\n'
                     '\n'
-                    '// Middlewares\n'
+                    '/* Middlewares */\n'
                     'app.use(expressLayouts)\n'
                     'app.use(express.json())\n'
                     'app.use(express.urlencoded({ extended: true }))\n'
@@ -232,13 +234,32 @@ def main():
                     '	})\n'
                     ')\n'
                     '\n'
-                    '// View Routes\n'
+                    '/* View Routes */\n'
                     'app.use(\'/\', require(\'./routes/index\'))\n'
                     '\n'
-                    '// Start express app\n'
+                    '/* Start Express App */\n'
                     'const _app = app.listen(PORT, require(\'os\').hostname(), () => {\n'
-                    '	console.log(`\\n\\t${APP_NAME} listening on http://${_app.address().address}:${_app.address().port}\\n`)\n'
+                    '	console.log(\n'
+                    '		`${APP_NAME} listening on http://${_app.address().address}:${_app.address().port}`\n'
+                    '	)\n'
                     '})\n')
+            f.close()
+            continue
+        if file == ".prettierrc":
+            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
+            f.write('{\n'
+                    '	"trailingComma": "es5",\n'
+                    '	"arrowParens": "always",\n'
+                    '	"useTabs": true,\n'
+                    '	"tabWidth": 3,\n'
+                    '	"semi": false,\n'
+                    '	"jsxSingleQuote": false,\n'
+                    '	"singleQuote": true,\n'
+                    '	"bracketSameLine": true,\n'
+                    '	"printWidth": 90,\n'
+                    '	"bracketSpacing": true,\n'
+                    '	"htmlWhitespaceSensitivity": "css"\n'
+                    '}\n')
             f.close()
             continue
         if file == "routes/index.js":
@@ -260,6 +281,25 @@ def main():
                     '</div>\n')
             f.close()
             continue
+        if file == "views/error.ejs":
+            f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
+            f.write('<div class="flex items-center justify-center w-screen h-screen bg-white">\n'
+                    '	<div class="flex flex-col items-center">\n'
+                    '		<h6 class="mb-2 text-2xl font-bold text-center text-gray-800 md:text-3xl">\n'
+                    '			<span class="text-red-500">Oops!</span> <%= error.code %>\n'
+                    '		</h6>\n'
+                    '		<pre class="mb-8 text-gray-500 md:text-lg">\n'
+                    '			<%= JSON.stringify(error, undefined, 2) %>\n'
+                    '		</pre\n'
+                    '		>\n'
+                    '		<button\n'
+                    '			onclick="history.back()"\n'
+                    '			class="px-6 py-2 text-sm font-semibold uppercase text-blue-800 bg-blue-100">\n'
+                    '			Go Back\n'
+                    '		</button>\n'
+                    '	</div>\n'
+                    '</div>\n')
+            f.close()
         if file == "views/layouts/layout.ejs":
             f = open(os.path.normpath(os.path.join(project_dir, file)), "x")
             f.write('<!DOCTYPE html>\n'
@@ -287,12 +327,12 @@ def main():
             continue
         if file == "views/partials/navbar.ejs":
             f = open(os.path.normpath(os.path.join(project_dir, file)), 'x')
-            f.write('<nav class="fixed top-0 w-full">\n'
+            f.write('<nav class="mb-10">\n'
                     '	<div class="w-10/12 mx-auto py-5 grid grid-cols-2">\n'
                     '		<a href="/">ExpressApp</a>\n'
                     '		<ul class="flex justify-end">\n'
                     '			<li><a href="/">Home</a></li>\n'
-                    '			<li><a href="/test1">Test1</a></li>\n'
+                    '			<li><a href="/login">Login</a></li>\n'
                     '			<li><a href="/test2">Test2</a></li>\n'
                     '		</ul>\n'
                     '	</div>\n'
@@ -350,7 +390,16 @@ def main():
                     '	return res.json({ message, status, data })\n'
                     '}\n'
                     '\n'
-                    'module.exports = { SuccessResponse, ErrorResponse }\n')
+                    '/**\n'
+                    ' *\n'
+                    ' * @param {Response} res Express app response parameter\n'
+                    ' * @param {import("mysql").MysqlError} err Error to be displayed on the express error page\n'
+                    ' */\n'
+                    'function RenderError(res, error) {\n'
+                    '	return res.render(\'error\', { error, title: \'Error\' })\n'
+                    '}\n'
+                    '\n'
+                    'module.exports = { SuccessResponse, ErrorResponse, RenderError }\n')
             f.close()
             continue
         if file == "tailwind.config.js":
@@ -410,19 +459,17 @@ def completed(generated_app_dir: str):
     print("*******************************************")
     print()
 
-    # Open project directory after app is generated. Windows Only
+    # Open project directory after app is generated. (Windows only)
     # explorer_path = os.path.join(os.getenv('WINDIR'), 'explorer.exe')
     # subprocess.run([explorer_path, generated_app_dir])
 
-    # Open project directory in VSCode if installed
+    # Open project directory in VSCode (If installed on Windows only)
     cmd_path = os.path.join(os.getenv("WINDIR"), os.path.normpath("/Windows/System32"), "cmd.exe")
     subprocess.run([cmd_path, f"cmd.exe /C cd {generated_app_dir} && code ."])
 
 
 # Script entry point
 if __name__ == "__main__":
-
-    # print(cmd_path)
     try:
         banner()
         main()

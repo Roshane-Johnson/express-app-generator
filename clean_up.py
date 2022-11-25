@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 def clean_up():
-    project_files: list[str] = [os.path.basename(__file__), '.idea', ".git", 'main.py', 'expressgen.bat', "README.md",
+    project_files: list[str] = [os.path.basename(__file__), '.idea', ".git", 'main.py', 'main_api.py', 'expressgen.bat', "README.md",
                                 'venv']
     files: list[str] = os.listdir(os.getcwd())
     dir_deleted = 0
